@@ -1,0 +1,44 @@
+title: "Practical Machine Learning Project"
+author: "GMI"
+date: "23th March 2020"
+output: html_document
+---
+
+# Executive Summary
+This project attempts to evelauate effect of using the devices such as Jawbone Up, Nike FuelBand, and Fitbit for collecting data information during activities for measurment of vital signe and health factors for modification of health behavior and enhance activities . Data collected from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. Exploratory analysis of data includes implementation of random forests for cross predication befor and after cross validation and test set with removal of columns less tha 60% of data and thereforedata validation and building a model with cross validation and predication .
+
+# Data
+The training data for this project are available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Install necessary packages
+  
+        install.packages("ElemStatLearn")
+        install.packages("caret") 
+        library(ElemStatLearn) 
+        library(caret) 
+        install.packages("rpart") 
+        library(rpart) 
+        install.packages("randomForest")
+        library(randomForest)
+ 
+   
+   # Download the data set
+        
+library(RCurl)
+train_data= read.csv(text=getURL("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"), na.strings=c("", "NA"))
+test_data = read.csv(text=getURL("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"), na.strings=c("", "NA"))
+
+ # Reading Data
+        TRN <- read.csv("pml-training.csv",na.strings = "")
+        TST <- read.csv("pml-testing.csv",na.strings = "NA")
+        dim(train_data)
+        [1] 19622   160
+        dim(test_data)
+        [1]  20 160
