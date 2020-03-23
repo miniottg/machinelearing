@@ -35,10 +35,70 @@ library(RCurl)
 train_data= read.csv(text=getURL("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"), na.strings=c("", "NA"))
 test_data = read.csv(text=getURL("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"), na.strings=c("", "NA"))
 
- # Reading Data
-        TRN <- read.csv("pml-training.csv",na.strings = "")
-        TST <- read.csv("pml-testing.csv",na.strings = "NA")
         dim(train_data)
         [1] 19622   160
         dim(test_data)
         [1]  20 160
+        
+       # Exploratory Data Analysis
+   Removal of missing value in Training and Testing Files
+
+        train_data1 <- train_data[,(colSums(is.na(train_data)) == 0)]
+        test_data1 <- test_data[,(colSums(is.na(test_data)) == 0)]
+    
+    Removal of Unnecessry columns in Training and Testing files
+    
+        colRm_TRN <- c("user_name","raw_timestamp_part_1","raw_timestamp_part_2","cvtd_timestamp","num_window")
+        colRm_TST <- c("user_name","raw_timestamp_part_1","raw_timestamp_part_2","cvtd_timestamp","num_window","problem_id")
+    
+        train_data <- train_data1[,!(names(train_data1) %in% colRm_TRN)]
+        test_data <- test_data1[,!(names(test_data1) %in% colRm_TST)]
+        
+        Determination of Dim
+        dim(train_data)
+        [1] 19622   121
+        dim(test_data)
+        [1] 20 53
+        
+        
+## Slice for Cross Validation
+
+The training data is divided into 2 sets by 'classe'. This first is a training set with 80% of the data to train the model. The second set is used to assess model performance.
+```{r}
+Training = createDataPartition(train_data$classe, p=0.80, list=F)
+train_final = train_data[Training, ]
+validate_final = train_data[-Training, ]
+```
+
+We use random forest classifier to predict the action class. To measure the accuracy of the model, we do 10-fold cross validation with 80:20 split, on each fold, 80% of the data is used for training the random forest and remaining 20% is used for testing. See above for the splitting of data
+
+```{r}
+library(randomForest)
+rfModel = randomForest(classe ~ ., data = train_final, importance = TRUE, ntrees = 10)
+```
+
+## Model Validation
+Testing the model performance on training set and cross valudation set
+```{r}
+rftraining = predict(rfModel, train_data)
+print(confusionMatrix(rftraining, train_data$classe))
+```
+Model performed well. Let's cross validate
+
+## Validate set accuracy
+```{r}
+rfvalidation = predict(rfModel, validate_final)
+print(confusionMatrix(rfvalidation, validate_final$classe))
+```
+The cross validation accuracy is 99.77%, which makes out of sample error 0.23%. The model is good.
+
+## Prediction
+```{r}
+results = predict(rfModel, 
+                   test_data[, -length(names(test_data))])
+results
+```
+        
+     
+     
+        
